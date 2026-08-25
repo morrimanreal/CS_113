@@ -16,7 +16,6 @@ def display_title():
     
 def get_username():
     username = input("Please enter your username: ")
-    return username
     pattern = r"^[A-Za-z0-9_]{5,15}$"
 
     if re.fullmatch(pattern, username):
@@ -26,12 +25,23 @@ def get_username():
         print("Username must be 5-15 characters.")
         print("Only letters, numbers, and underscores are allowed.")
         get_username()  # Prompt the user again if the username is invalid
+    return username
         
-def save_player(username, result=""):
+def save_player(username, result):
+    
+    # try:
+    #     with open("players.json", "r") as file:
+    #         players = json.load(file)
+
+    # except FileNotFoundError:
+    #     players = []
+        
     player = {
         "username": username,
         "result": result
     }
+    
+    # players.append(player)
 
     with open("players.json", "w") as file:
         json.dump(player, file, indent=4)
@@ -73,6 +83,8 @@ def play_game():
                 result = "died"
             else:
                 print("Invalid choice. Please choose 'red', 'black', or 'white'.")
+                
+            return result
         else:
             print("You failed to pick a door in time. Game over!")
     else:
@@ -114,8 +126,6 @@ def main():
     display_title()
     username = get_username()   
     
-    
-    
     print("\nYou woke up in a mysterious room.")
     print("You need to find a way to escape.")
     print("There are three doors in front of you.")
@@ -130,13 +140,13 @@ def main():
     print("Good luck!")
     
     while True:
-        play_game()
+        result = play_game()
 
         if play_again() == False:
             print("Thanks for playing!")
             break
         
     
-    save_player(username, result="")
+    save_player(username, result)
         
 main()
