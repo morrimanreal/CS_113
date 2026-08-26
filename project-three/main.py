@@ -5,7 +5,7 @@ from sklearn.linear_model import LinearRegression
 # Load the dataset from a CSV file
 def load_dataset():
     try:
-        data = pd.read_csv("example_data.csv")
+        data = pd.read_csv("house-prices.csv")
 
         print("Dataset loaded successfully!")
         print()
@@ -21,47 +21,81 @@ def load_dataset():
 def explore_data(data):
     print("\n--- Basic Statistics ---")
 
-    # Displays count, mean, standard deviation,
-    # minimum, maximum, and quartiles
-    print(data.describe())
+    # Displays mean, min, max, standard deviation, etc.
+    print(data[["SqFt", "Price"]].describe())
+
+    # Display individual statistics
+    print("\nAverage House Size:", data["SqFt"].mean())
+    print("Minimum House Size:", data["SqFt"].min())
+    print("Maximum House Size:", data["SqFt"].max())
+
+    print("\nAverage Price: $", data["Price"].mean())
+    print("Minimum Price: $", data["Price"].min())
+    print("Maximum Price: $", data["Price"].max())
+
+    # Scatter plot
+    plt.scatter(data["SqFt"], data["Price"])
+
+    plt.xlabel("House Size (SqFt)")
+    plt.ylabel("House Price ($)")
+    plt.title("House Size vs. Price")
+
+    plt.show()
 
 # Visualize the relationship between house size and price
 def visualize_data(data):
-    # Create scatter plot
-    plt.scatter(data["Size (sqft)"], data["Price ($)"])
+    # House size
+    X = data[["SqFt"]]
 
+    # Actual house prices
+    y = data["Price"]
+
+    # Get predicted prices
+    predicted_prices = model.predict(X)
+
+    # Plot actual data points
+    plt.scatter(data["SqFt"], y, label="Actual Prices")
+
+    # Plot regression line
+    plt.plot(data["SqFt"], predicted_prices, label="Regression Line")
+
+    # Add graph labels
+    plt.xlabel("House Size (SqFt)")
+    plt.ylabel("House Price ($)")
     plt.title("House Size vs. Price")
-    plt.xlabel("Size (sqft)")
-    plt.ylabel("Price ($)")
 
+    plt.legend()
     plt.show()
     
 # Train a linear regression model to predict house prices based on size    
 def train_model(data):
-    # X = input/independent variable
-    X = data[["Size (sqft)"]]
+    # Independent variable
+    X = data[["SqFt"]]
 
-    # y = output/dependent variable
-    y = data["Price ($)"]
+    # Dependent variable
+    y = data["Price"]
 
-    # Create linear regression model
+    # Create model
     model = LinearRegression()
 
-    # Train the model
+    # Train model
     model.fit(X, y)
 
-    # Display model information
+    # Calculate R-squared
+    r_squared = model.score(X, y)
+
     print("\n--- Linear Regression Model ---")
+
     print("Coefficient:", model.coef_[0])
     print("Intercept:", model.intercept_)
-    print("R² Score:", model.score(X, y))
+    print("R² Score:", r_squared)
 
     return model
 
 # Visualize the model's predictions against actual data
 def visualize_model(data, model):
     # Independent variable
-    X = data[["Size (sqft)"]]
+    X = data[["SqFt (SqFt)"]]
 
     # Actual house prices
     y = data["Price ($)"]
@@ -70,14 +104,14 @@ def visualize_model(data, model):
     predicted_prices = model.predict(X)
 
     # Plot original data points
-    plt.scatter(data["Size (sqft)"], y, label="Actual Prices")
+    plt.scatter(data["SqFt (SqFt)"], y, label="Actual Prices")
 
     # Plot regression line
-    plt.plot(data["Size (sqft)"], predicted_prices,
+    plt.plot(data["SqFt (SqFt)"], predicted_prices,
              label="Regression Line")
 
     # Labels and title
-    plt.xlabel("Size (sqft)")
+    plt.xlabel("SqFt (SqFt)")
     plt.ylabel("Price ($)")
     plt.title("House Size vs. Price")
 
@@ -88,15 +122,24 @@ def visualize_model(data, model):
 def predict_price(model):
     while True:
         try:
-            size = float(input("Enter house size in square feet: "))
+            # Ask user for house size
+            size = float(input("\nEnter house size in square feet: "))
 
+            # Check for negative or zero values
             if size <= 0:
                 print("House size must be greater than 0.")
                 continue
 
-            prediction = model.predict([[size]])
+            # Put user input into a DataFrame
+            house = pd.DataFrame({
+                "SqFt": [size]
+            })
 
-            print("Estimated house price: $", round(prediction[0], 2))
+            # Predict house price
+            prediction = model.predict(house)
+
+            # Display predicted price
+            print(f"Estimated House Price: ${prediction[0]:,.2f}")
 
             break
 
